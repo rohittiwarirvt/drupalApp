@@ -1,0 +1,79 @@
+<?php
+
+/**
+ * Implements hook_install().
+ */
+
+function evolent_v1_schema() {
+  $schema['contact_v1'] = array(
+    'description' => 'The base Table for Contacts v1',
+    'fields' => array(
+      'cid' => array(
+        'description' =>'Primary key',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE
+        ),
+      'first_name' => array(
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+        ),
+      'last_name' => array(
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+        ),
+      'email' => array(
+        'type' => 'varchar',
+        'length' => 150,
+        'not null' => TRUE,
+        'default' => '',
+        ),
+      'phone_number' => array(
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+        ),
+      'status' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 1,
+        ),
+      'uid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        ),
+      ),
+    'primary key' => array('cid'),
+    'indexes' => array(
+      'uid' => array('uid'),
+      'cid' => array('cid')
+      ),
+
+    'foreign key' => array(
+      'contact_created' => array(
+        'table' => 'user',
+        'columns' => array(
+          'uid' => 'uid'
+          )
+        )
+      )
+  );
+
+  return $schema;
+}
+
+
+/**
+ * Implements hook_unistall().
+ */
+
+function evolent_v1_unistall() {
+  drupal_uninstall_schema('contact_v1');
+}

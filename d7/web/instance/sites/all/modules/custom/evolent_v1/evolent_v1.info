@@ -1,0 +1,5 @@
+name = Evolent V1 module 
+description = Module has simple CRUD operation of Contacts using custom table and module
+package = Evolent 
+core = 7.x
+version = 1.0.0

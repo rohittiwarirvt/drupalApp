@@ -1,0 +1,78 @@
+<?php
+
+
+/**
+ * Implementas hook_menu
+ */
+
+function evolent_v1_menu() {
+  $menu = array();
+
+  $menu['evolent/v1/contact'] = array(
+    'title' => 'Add Contact',
+    'page callback' => 'evolent_list_all_contact_v1',
+    'access argument' => TRUE,
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'file' => 'includes/evolent_contact_v1.inc'
+  );
+
+  $menu['evolent/v1/contact/add'] = array(
+    'title' => 'Add Contact',
+    'page callback' => 'evolent_add_contact_v1',
+    'access argument' => TRUE,
+    'type' => MENU_LOCAL_ACTION.
+    'file' => 'includes/evolent_contact_v1.inc'
+
+  );
+
+  $menu['evolent/v1/contact/*/edit'] = (
+    'title' => 'Add Contact',
+    'page callback' => 'evolent_edit_contact_v1',
+    'access argument' => TRUE,
+    'type' => MENU_LOCAL_ACTION,
+    'file' => 'includes/evolent_contact_v1.inc'
+
+  );
+
+  $menu['evolent/v1/contact/*/delete'] = array(
+    'title' => 'Add Contact',
+    'page callback' => 'evolent_delete_contact_v1',
+    'access argument' => TRUE,
+    'type' => MENU_LOCAL_ACTION,
+    'file' => 'includes/evolent_contact_v1.inc'
+
+  );
+
+
+  return $menu;
+}
+
+
+/**
+ * Implements hook_permission().
+ */
+
+function evolent_v1_permissions() {
+  $permissions = array();
+
+  $permissions = array(
+    'create contact' => array(
+      'title' => t('Create Contact')
+      'description' => 'Create a contact',
+      ),
+    'view contact' => array(
+      'title' => t('View A Contact')
+      'description' => 'View a contact',
+      ),
+    'edit contact' => array(
+      'title' => t('Edit a Contact')
+      'description' => 'Edit a contact',
+      ),
+    'delete contact' => array(
+      'title' => t('Delete a Contact')
+      'description' => 'Delete a contact',
+      ),
+    );
+
+  return $permissions;
+}

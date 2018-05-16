@@ -14,7 +14,7 @@ services:
     ports:
       - 8906:3306
     volumes:
-      - ./db/data:/var/www/mysql
+      - ./db/data:/var/lib/mysql
       - ./db/config/custom.cnf:/etc/mysql/conf.d/custom.cnf
       - ./db/config/my.cnf:/etc/mysql/my.cnf
 
