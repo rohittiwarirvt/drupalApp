@@ -109,13 +109,44 @@ function evolent_edit_contact_v1_submit($form, &$form_state) {
    } catch( Exceptin $e) {
      drupal_set_message(t('contact update failed. Message @message', array('@message' => $e->getMessage())), 'error');
    }
+
+   drupal_set_message(t('Contact updated successfully'),'status');
 }
 
-function evolent_delete_contact_v1() {
+function evolent_delete_contact_v1($form, $form_state, $contact) {
+  $form['#contact'] = $contact;
+  $form['cid'] = array(
+    '#type' => 'value',
+    '#value' => $contact->cid
+    );
+  $name = $contact->first_name.' ' .$contact->last_name;
+  return confirm_form($form,
+     t('Are you sure you want to deletle the %name contact ?', array('%name' => $name)),
+      'evolent/v1/contact/'.$contact->cid,
+       t('This action cannot be undone.'),
+        t('Delete'),
+         t('Cancel')
+    );
+}
 
+
+function evolent_delete_contact_v1_submit($form, &$form_state) {
+  module_load_include('inc', 'evolent_v1', 'includes/evolent_contact_v1.utils');
+
+  if ( $form_state['values']['confirm']) {
+    try {
+      contact_delete_util(array('cid' => $form_state['values']['cid']));
+      $form_state['redirect'] = '/evolent/v1/contact';
+    } catch (Exception $e) {
+      drupal_set_message(t('Unable to delete a contact. Message @message', array('@message' => $e->getMessage())), 'error');
+    }
+    drupal_set_message(t('Contact deleted successfully'),'status');
+
+  }
 }
 
 function evolent_list_all_contact_v1() {
+  module_load_include('inc', 'evolent_v1', 'includes/evolent_contact_v1.utils');
   $query = db_select(CONTACT_V1_TABLE, 'cv1')
             ->fields('cv1', array('cid', 'first_name','last_name'))
             ->addTag('node_access');
@@ -127,10 +158,13 @@ function evolent_list_all_contact_v1() {
     array( 'data' => t('Id'), 'field' => 'cv1.cid'),
     array( 'data' => t('First Name'), 'field' => 'cv1.first)name'),
     array( 'data' => t('Last name'), 'field' => 'cv1.last_name'),
+    array( 'data' => t('Actions'))
     );
   $rows = array();
   foreach ($result as  $row) {
-    $rows[] = array('data' =>  (array) $row);
+    $action = build_action($row);
+    $rows_data = array_merge((array) $row, $action );
+    $rows[] = array('data' => $rows_data );
   }
   $output = array(
     '#theme' => 'table',
