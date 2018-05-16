@@ -42,7 +42,8 @@ function evolent_v1_menu() {
 
   $menu['evolent/v1/contact/%contact/delete'] = array(
     'title' => 'Delete Contact',
-    'page callback' => 'evolent_delete_contact_v1',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('evolent_delete_contact_v1', 3),
     'access callback' => TRUE,
     'type' => MENU_NORMAL_ITEM,
     'file' => 'includes/evolent_contact_v1.inc'
