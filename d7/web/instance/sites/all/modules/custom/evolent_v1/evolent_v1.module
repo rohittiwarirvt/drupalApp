@@ -50,6 +50,15 @@ function evolent_v1_menu() {
 
   );
 
+  $menu['evolent/v1/contact/%contact/view'] = array(
+    'title' => 'View Contact',
+    'page callback'=> 'evolent_show_contact_v1',
+    'page arguments' => array(3),
+    'access callback' => TRUE,
+    'type' => MENU_LOCAL_ACTION,
+    'file' => 'includes/evolent_contact_v1.inc'
+
+  );
 
   return $menu;
 }
@@ -91,6 +100,31 @@ function contact_load($cid = NULL) {
 }
 
 /**
- * Implements hook_theme
+ * Implements hook_theme().
  */
 
+function evolent_v1_theme($existing, $type, $theme, $path) {
+  $path = drupal_get_path('module', 'evolent_v1');
+  return array(
+     'evolent_v1_show_contact' => array(
+        'variables' => array('contact' => NULL),
+        'template' => 'evolent-v1-contact-view',
+        'path' => $path .'/templates'
+      )
+    );
+}
+
+/**
+ *  using template preprocess for defining default values
+ */
+function template_preprocess_evolent_v1_show_contact(&$vars){
+  $contact = $vars['contact'];
+  $vars['cid'] = $contact->cid;
+  $vars['first_name'] = $contact->first_name;
+  $vars['last_name'] = $contact->last_name;
+  $vars['email'] =  $contact->email;
+  $vars['phone_number'] = $contact->phone_number;
+  $vars['status'] = $contact->status;
+  $author = user_load($contact->uid);
+  $vars['author_name'] = $author->name;
+}

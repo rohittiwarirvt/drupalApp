@@ -175,6 +175,11 @@ function evolent_list_all_contact_v1() {
 }
 
 
-function evolent_show_contact_v1() {
+function evolent_show_contact_v1($contact) {
+  $build = array(
+    '#theme' => 'evolent_v1_show_contact',
+    '#contact' => $contact,
+  );
 
+  return $build;
 }
