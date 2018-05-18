@@ -19,6 +19,7 @@ RUN set -ex; \
   docker-php-ext-configure gd --with-png-dir=/usr --with-jpeg-dir=/usr; \
   docker-php-ext-install -j "$(nproc)" \
     gd \
+    exif \
     opcache \
     pdo_mysql \
     zip \
@@ -49,5 +50,28 @@ RUN { \
     echo 'opcache.enable_cli=1'; \
   } > /usr/local/etc/php/conf.d/opcache-recommended.ini
 
+ADD ./instance /var/www/html
+RUN mkdir /var/www/scripts
+ADD ./scripts /var/www/scripts
+
+# Version
+ENV COMPOSER_VERSION 1.6.5
+
+# Let's roll
+RUN  DEBIAN_FRONTEND=noninteractive curl -sSL https://getcomposer.org/installer \
+   | php -- --install-dir=/usr/local/bin \
+   --filename=composer --version=${COMPOSER_VERSION} && \
+    chmod +x /usr/local/bin/composer && \
+    echo 'export PATH="$PATH:$HOME/.composer/vendor/bin"' >> ~/.bashrc && \
+    composer global require drush/drush:8.x
+
 WORKDIR /var/www/html
+
+RUN apt-get update && apt-get install -y mysql-client wget vim
+
+RUN chown www-data:www-data -R /var/www/html && \
+    find /var/www/html/ -type d -exec chmod 755 {} \; && \
+    find /var/www/html/ -type f -exec chmod 755 {} \;&& \
+    chmod -R 777 /var/www/html/sites/default/files && \
+    find /var/www/scripts/ -type f -exec chmod 2755 {} \;
 
