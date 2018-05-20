@@ -3,10 +3,12 @@ services:
   web:
     build: 'web/'
     env_file: app-env.dev
+    entrypoint: "/var/www/scripts/start"
     depends_on:
       - db
     volumes:
       - ./web/instance:/var/www/html
+      - ./web/scripts:/var/www/scripts
     ports:
       - 8989:80
   db:
