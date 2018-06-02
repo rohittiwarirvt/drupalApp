@@ -41,12 +41,12 @@ function evolent_v2_entity_info() {
     $return['contact_v2']['bundles'][$type] = array(
       'label' => $info->name,
       'admin' => array(
-        'path' => 'admin/structure/contacts_v2/manage/%contact_type',
+        'path' => 'admin/structure/contacts_v2/manage/%contacts_v2_type',
         'real path' => 'admin/structure/contacts_v2/manage/' . str_replace('_', '-', $type),
         'bundle argument' => 4,
         'access arguments' => array('administer contacts v2')
         )
-      )
+      );
   }
   return $return;
 }
@@ -70,7 +70,7 @@ function contact_v2_uri($contact) {
 
 function evolent_v2_permission() {
 
-  return arrray(
+  return array(
     'administer contacts v2' => array(
       'title' => t('Administer Contacts V2')
       ),
@@ -86,7 +86,7 @@ function evolent_v2_permission() {
     'delete contacts v2' => array(
       'title' => t('Delete Contacts v2')
       )
-    )
+    );
 }
 
 
@@ -94,17 +94,17 @@ function contacts_v2_types() {
   $types = &drupal_static(__FUNCTION__);
 
   if (empty($types)) {
-    $types['personal_contact'] = array(
-      'type' => 'personal contact',
+    $types['personal_contact'] = (object)array(
+      'type' => 'personal_contact',
       'name' => t('Personal Contact'),
-      'description' => t('A Contact of a friend family ');
-      )
-    $types['commercial_contact'] = array(
+      'description' => t('A Contact of a friend family '),
+      );
+    $types['commercial_contact'] = (object)array(
       'type' => 'commercial_contact',
       'name' => t('Commercial Contact'),
       'description' => t('A Business, Networking or Lead Contact')
-    )
-    $types['other_contact'] => array(
+    );
+    $types['other_contact'] = (object)array(
       'type' => 'other_contact',
       'name' => t('Other/Misc Contact'),
       'description' => t('A Miscellaneaour or uncategorised contacts')
@@ -151,66 +151,68 @@ function evolent_v2_menu() {
     'description' => 'Add new Contact v2',
     'page callback' => 'contacts_v2_add_page',
     'access arguments' => array('create contacts v2'),
+    'weight' => 1,
     'menu_name' => 'management',
     'file' => 'evolent_v2.pages.inc'
   );
 
   foreach (contacts_v2_types() as  $type) {
-    $type_url_str = str_replace('_', '-', $type->type)
-    $menu['contact_v3/add/' . $type_url_str] = array(
-      'title' => $type->$title,
+    $type_url_str = str_replace('_', '-', $type->type);
+    $menu['contact_v2/add/' . $type_url_str] = array(
+      'title' => $type->name,
       'title callback' => 'check_plain',
       'page callback' => 'contacts_v2_add',
       'page arguments' => array(2),
       'access arguments' => array('create contacts v2'),
       'description' => $type->description,
       'file' => 'evolent_v2.pages.inc'
-    )
+    );
   }
 
-  $menu['contacts_v2/%contacts_v2'] = array(
+  $menu['contact_v2/%contacts_v2'] = array(
     'title callback' => 'contacts_v2_page_title',
     'title arguments' => array(1),
     'page callback' => 'contacts_v2_page_view',
     'page arguments' => array(1),
-    'access agruments' => array('view contacts_v2'),
+    'access arguments' => array('view contacts v2'),
     'type' => MENU_CALLBACK,
-    'file' => 'contact_v2.pages.inc'
-  )
+    'file' => 'evolent_v2.pages.inc'
+  );
 
-  $menu['contacts_v2/%contacts_v2/view'] = array(
+  $menu['contact_v2/%contacts_v2/view'] = array(
     'title' => 'View',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   );
 
-  $menu['contacts_v2/%contacts_v2/edit'] = array(
+  $menu['contact_v2/%contacts_v2/edit'] = array(
     'title' => 'Edit',
-    'page callback' => 'contacts_v2_page_edit',
+    'page callback' => 'contact_v2_page_edit',
     'page arguments' => array(1),
-    'access arguments' => array('update contacts_v2'),
+    'access arguments' => array('update contacts v2'),
     'weight' => 0,
     'type' => MENU_LOCAL_TASK,
     'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
     'file' => 'evolent_v2.pages.inc',
   );
 
-  $items['contacts_v2/%contacts_v2/delete'] = array(
+  $menu['contact_v2/%contacts_v2/delete'] = array(
     'title' => 'Delete',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('contacts_v2_delete_confirm', 1),
-    'access arguments' => array('delete contacts_v2'),
+    'access arguments' => array('delete contacts v2'),
     'weight' => 1,
     'type' => MENU_LOCAL_TASK,
     'context' => MENU_CONTEXT_INLINE,
     'file' => 'evolent_v2.pages.inc',
   );
-  $items['contacts_v2/recent'] = array(
+  $menu['contact_v2/recent'] = array(
     'title' => 'Recently added contacts_v2',
-    'page callback' => 'contacts_v2_page_list_recent',
-    'access arguments' => array('view contacts_v2'),
+    'page callback' => 'contact_v2_page_list_recent',
+    'access arguments' => array('view contacts v2'),
     'file' => 'evolent_v2.pages.inc',
   );
+  return $menu;
 }
 
 
@@ -224,7 +226,7 @@ function evolent_v2_menu() {
  */
 
 
-function contacts_v3_type_page_title($type) {
+function contacts_v2_type_page_title($type) {
   return t('Manage @type', array('@type' => $type->name));
 }
 
@@ -240,7 +242,7 @@ function contacts_v3_type_page_title($type) {
  */
 
 
-function contact_v2_type_load($type) {
+function contacts_v2_type_load($type) {
   $types = contacts_v2_types();
   $type = str_replace('-', '_', $type);
   return isset($types[$type]) ? $types[$type] : FALSE;
@@ -259,8 +261,7 @@ function contact_v2_type_load($type) {
  * @return
  *   A fully-populated node object.
  */
-
-function contact_v2_load($cid = NULL, $vid =NULL, $reset = FALSE) {
+function contacts_v2_load($cid = NULL, $vid =NULL, $reset = FALSE) {
   $cids = (isset($cid) ? array($cid): array());
   $conditions = (isset($vid) ? array('vid' => $vid) : array());
   $contact_v2 = contact_v2_load_multiple($cids, $conditions, $reset);
@@ -272,7 +273,7 @@ function contact_v2_load($cid = NULL, $vid =NULL, $reset = FALSE) {
  * Load contact_v2 entities from the database.
  *
  * This function should be used whenever you need to load more than one contact_v2
- * from the database. Artworks are loaded into memory and will not require
+ * from the database. Contacts are loaded into memory and will not require
  * database access if loaded again during the same page request.
  *
  * @see entity_load()
@@ -365,10 +366,69 @@ function contact_v2_delete_multiple($cids) {
  */
 function evolent_v2_forms() {
   $forms = array();
-  if ($types = contact_v2_types()) {
+  if ($types = contacts_v2_types()) {
     foreach (array_keys($types) as $type) {
-      $forms[$type . '_contact_v2_form']['callback'] = 'contact_v2_form';
+      $forms[$type . '_contacts_v2_form']['callback'] = 'contact_v2_form';
     }
   }
   return $forms;
+}
+
+
+/**
+ * Implements hook_fied_extra_fields().
+ */
+function evolent_v2_field_extra_fields() {
+  $extra = array();
+
+  foreach (contacts_v2_types() as $type) {
+    $extra['contact_v2'][$type->type] = array(
+      'form' => array(
+        'title' => array(
+          'label' => t('Title'),
+          'description' => t('The title of the contact'),
+          'weight' => -5,
+        ),
+        'first_name' => array(
+          'label' => t('First Name'),
+          'description' => t('The first name of the contact'),
+          'weight' => -4,
+        ),
+        'last_name' => array(
+          'label' => t('Last Name'),
+          'description' => t('The last name of the contact'),
+          'weight' => -3,
+        ),
+        'email' => array(
+          'label' => t('Email'),
+          'description' => t('The email of the contact'),
+          'weight' => -2,
+        ),
+      ),
+      'display' => array(
+        'title' => array(
+          'label' => t('Title'),
+          'description' => t('The title of the contact'),
+          'weight' => -5,
+        ),
+        'first_name' => array(
+          'label' => t('First Name'),
+          'description' => t('The first name of the contact'),
+          'weight' => -4,
+        ),
+        'last_name' => array(
+          'label' => t('Last Name'),
+          'description' => t('The last name of the contact'),
+          'weight' => -3,
+        ),
+        'email' => array(
+          'label' => t('Email'),
+          'description' => t('The email of the contact'),
+          'weight' => -2,
+        ),
+      ),
+    );
+  }
+
+  return $extra;
 }
