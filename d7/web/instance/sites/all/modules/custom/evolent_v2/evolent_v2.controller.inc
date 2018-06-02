@@ -193,6 +193,10 @@ class ContactController extends DrupalDefaultEntityController {
       'cid' => '',
       'type' => $type,
       'title' => '',
+      'first_name' => '',
+      'last_name' => '',
+      'email' => '',
+
     );
   }
 }

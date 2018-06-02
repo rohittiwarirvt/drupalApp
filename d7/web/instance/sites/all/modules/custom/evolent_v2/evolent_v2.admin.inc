@@ -8,7 +8,7 @@ function contacts_v2_overview_types() {
   foreach (contacts_v2_types() as $type => $info) {
     $type_url_str = str_replace('_', '-', $type);
     $label = t('View @type', array('@type' => $info->name));
-    $items[] = l($label, 'admin/structure/artworks/manage/' . $type_url_str);
+    $items[] = l($label, 'admin/structure/contacts_v2/manage/' . $type_url_str);
   }
 
   return theme('item_list', array('items' => $items));

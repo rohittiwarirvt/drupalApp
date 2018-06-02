@@ -3,3 +3,7 @@ description = Module has simple CRUD operation of Contacts using entity Apis
 package = Evolent 
 core = 7.x
 version = 2.0.0
+
+files[] = evolent_v2.admin.inc
+files[] = evolent_v2.pages.inc
+files[] = evolent_v2.controller.inc

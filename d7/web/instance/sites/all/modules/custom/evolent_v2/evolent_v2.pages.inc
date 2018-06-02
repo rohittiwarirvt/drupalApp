@@ -36,9 +36,8 @@ function contacts_v2_add($type) {
     return MENU_NOT_FOUND;
   }
 
-  $contacts_v2 = entity_get_controller('contacts_v2')-> create($type);
-
-  drupal_set_title(t('Create @name'), array('@name' => $types[$type]->name), PASS_THROUGH);
+  $contacts_v2 = entity_get_controller('contact_v2')-> create($type);
+  drupal_set_title(t('Create @name', array('@name' => $types[$type]->name)), PASS_THROUGH);
 
   return drupal_get_form($type . '_contacts_v2_form', $contacts_v2);
 }
@@ -55,23 +54,45 @@ function contacts_v2_add($type) {
  *
  */
 
-function contacts_v2_page_view($contact_v1, $view_mode = 'full') {
+function contacts_v2_page_view($contact_v2, $view_mode = 'full') {
   // Remove previously built content, if exists.
-  $contact_v1->content = array();
+  $contact_v2->content = array();
 
   if ($view_mode == 'teaser') {
-    $contact_v2->contect['title'] = array(
-      '#markup' => filter_xss($contact_v2->title),
+    $contact_v2->content['title'] = array(
+      '#markup' => filter_xss($contact_v2->title) . '<br/>',
       '#weight' => -5,
-    )
+    );
   }
 
-  field_attach_prepare_view('contact_v2', array($contact_v1->cid => $contact_v1), $view_mode);
-  entity_prepare_view('contact_v2', array($contact_v1->cid => $contact_v1));
+  field_attach_prepare_view('contact_v2', array($contact_v2->cid => $contact_v2), $view_mode);
+  entity_prepare_view('contact_v2', array($contact_v2->cid => $contact_v2));
   $contact_v2->content += field_attach_view('contact_v2', $contact_v2, $view_mode);
 
+  $extra_fields = evolent_v2_field_extra_fields();
+
+  if (empty($extra_fields['contact_v2'][$contact_v2->type]['display'])) {
+    return ;
+  }
+
+  $config = field_bundle_settings('contact_v2', $contact_v2->type);
+  foreach ($extra_fields['contact_v2'][$contact_v2->type]['display'] as $field_name => $field_info) {
+    if (empty($config['extra_fields']['display'][$field_name][$view_mode]['visible'])) {
+      continue;
+    }
+    $element = array(
+      '#tag' => 'span',
+      '#value' => $contact_v2->$field_name . '<br/>',
+    );
+    $attributes= array();
+    $attributes['class'] = $field_name;
+    $element['#attributes'] = $attributes;
+    $variables['element'] = $element;
+    $contact_v2->content[$field_name]['#markup'] = theme('html_tag', $variables);
+  }
   return $contact_v2->content;
 }
+
 
 
 
@@ -83,10 +104,10 @@ function contacts_v2_page_view($contact_v1, $view_mode = 'full') {
  */
 
 function contact_v2_page_edit($contact_v2) {
-  $types = contact_v2_types();
+  $types = contacts_v2_types();
   drupal_set_title(t('<em>Edit @type</em> @title', array('@type' => $types[$contact_v2->type]->name, '@title' => $contact_v2->title)), PASS_THROUGH);
 
-  return drupal_get_form($contact_v2->type . '_contact_v2_form', $contact_v2);
+  return drupal_get_form($contact_v2->type . '_contacts_v2_form', $contact_v2);
 }
 
 
@@ -114,7 +135,7 @@ function contacts_v2_delete_confirm($form, &$form_state, $contacts_v2) {
 function contacts_v2_delete_confirm_submit($form, &$form_state) {
   if ($form_state['values']['confirm']) {
     $contacts_v2 = contacts_v2_load($form_state['values']['cid']);
-    contacts_v2_delete($form_state['values']['cid']);
+    contact_v2_delete($form_state['values']['cid']);
     watchdog('contacts_v2', '@type: deleted %title.', array('@type' => $contacts_v2->type, '%title' => $contacts_v2->title));
 
     $types = contacts_v2_types();
@@ -137,14 +158,12 @@ function contact_v2_page_list_recent() {
   $query = new EntityFieldQuery();
   $query
     ->entityCondition('entity_type', 'contact_v2')
-    ->propertyOrderBy('created', 'DESC')
-    ->fieldCondition('field_artist', 'value', 'Da Vinci', 'CONTAINS', 0)
-    ->range(0, 5);
+    ->propertyOrderBy('created', 'DESC');
   $result = $query->execute();
 
   $contact_v2s = contact_v2_load_multiple(array_keys($result['contact_v2']));
   foreach ($contact_v2s as $contact_v2) {
-    $content[$contact_v2->cid] = contact_v2_page_view($contact_v2, 'teaser');
+    $content[$contact_v2->cid] = contacts_v2_page_view($contact_v2, 'teaser');
   }
 
   return $content;
@@ -176,7 +195,28 @@ function contact_v2_form($form, &$form_state, $contact_v2) {
     '#weight' => -5,
     '#required' => TRUE,
   );
+  $form['first_name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('First Name'),
+    '#default_value' => $contact_v2->first_name,
+    '#weight' => -4,
+    '#required' => TRUE,
+  );
 
+  $form['last_name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Last Name'),
+    '#default_value' => $contact_v2->last_name,
+    '#weight' => -3,
+    '#required' => TRUE,
+  );
+  $form['email'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Email'),
+    '#default_value' => $contact_v2->email,
+    '#weight' => -5,
+    '#required' => TRUE,
+  );
   $form['revision'] = array(
     '#access' => user_access('administer contact_v2s'),
     '#type' => 'checkbox',
@@ -229,6 +269,10 @@ function contact_v2_form_submit($form, &$form_state) {
   }
 
   $contact_v2->title = $form_state['values']['title'];
+  $contact_v2->first_name = $form_state['values']['first_name'];
+  $contact_v2->last_name = $form_state['values']['last_name'];
+  $contact_v2->email = $form_state['values']['email'];
+
   $contact_v2->revision = $form_state['values']['revision'];
 
   // Notify field widgets.
@@ -238,7 +282,7 @@ function contact_v2_form_submit($form, &$form_state) {
   contact_v2_save($contact_v2);
 
   // Notify the user.
-  drupal_set_message(t('Artwork saved.'));
+  drupal_set_message(t('Contact saved.'));
 
   $form_state['redirect'] = 'contact_v2/' . $contact_v2->cid;
 }

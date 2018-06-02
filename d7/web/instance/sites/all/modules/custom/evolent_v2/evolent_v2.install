@@ -3,11 +3,11 @@
 
 
 /**
- *  Implements hook_install().
+ *  Implements hook_schema().
  *
  */
 
-function evolent_v2_install() {
+function evolent_v2_schema() {
   $schema = array();
 
   $schema['contact_v2'] = array(
@@ -19,7 +19,21 @@ function evolent_v2_install() {
         'unsigned' => TRUE,
         'not null' => TRUE
         ),
-      'bundle_type' => array(
+      'vid' => array(
+        'description' => 'The current {contact_v2_revision}.vid version identifier.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'title' => array(
+        'description' => 'The title of this contact .',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'type' => array(
         'type' => 'varchar',
         'length' => 100,
         'not null' => TRUE,
@@ -53,6 +67,11 @@ function evolent_v2_install() {
         'type' => 'int',
         'not null' => TRUE,
         'default' => 0
+        ),
+      'changed' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
         ),
       ),
     'primary key' => array('cid'),
@@ -98,7 +117,7 @@ function evolent_v2_install() {
       'cid' => array('cid')
       ),
     'primary key' => array('vid'),
-    'foriegn  keys' => array(
+    'foreign  keys' => array(
       'contact_v2' => array(
         'table' => 'contact_v2',
         'columns' => array(
