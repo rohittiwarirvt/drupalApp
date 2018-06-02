@@ -153,8 +153,64 @@ function evolent_v2_menu() {
     'access arguments' => array('create contacts v2'),
     'menu_name' => 'management',
     'file' => 'evolent_v2.pages.inc'
+  );
+
+  foreach (contacts_v2_types() as  $type) {
+    $type_url_str = str_replace('_', '-', $type->type)
+    $menu['contact_v3/add/' . $type_url_str] = array(
+      'title' => $type->$title,
+      'title callback' => 'check_plain',
+      'page callback' => 'contacts_v2_add',
+      'page arguments' => array(2),
+      'access arguments' => array('create contacts v2'),
+      'description' => $type->description,
+      'file' => 'evolent_v2.pages.inc'
+    )
+  }
+
+  $menu['contacts_v2/%contacts_v2'] = array(
+    'title callback' => 'contacts_v2_page_title',
+    'title arguments' => array(1),
+    'page callback' => 'contacts_v2_page_view',
+    'page arguments' => array(1),
+    'access agruments' => array('view contacts_v2'),
+    'type' => MENU_CALLBACK,
+    'file' => 'contact_v2.pages.inc'
   )
 
+  $menu['contacts_v2/%contacts_v2/view'] = array(
+    'title' => 'View',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+
+  $menu['contacts_v2/%contacts_v2/edit'] = array(
+    'title' => 'Edit',
+    'page callback' => 'contacts_v2_page_edit',
+    'page arguments' => array(1),
+    'access arguments' => array('update contacts_v2'),
+    'weight' => 0,
+    'type' => MENU_LOCAL_TASK,
+    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+    'file' => 'evolent_v2.pages.inc',
+  );
+
+  $items['contacts_v2/%contacts_v2/delete'] = array(
+    'title' => 'Delete',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('contacts_v2_delete_confirm', 1),
+    'access arguments' => array('delete contacts_v2'),
+    'weight' => 1,
+    'type' => MENU_LOCAL_TASK,
+    'context' => MENU_CONTEXT_INLINE,
+    'file' => 'evolent_v2.pages.inc',
+  );
+  $items['contacts_v2/recent'] = array(
+    'title' => 'Recently added contacts_v2',
+    'page callback' => 'contacts_v2_page_list_recent',
+    'access arguments' => array('view contacts_v2'),
+    'file' => 'evolent_v2.pages.inc',
+  );
 }
 
 
@@ -188,4 +244,131 @@ function contact_v2_type_load($type) {
   $types = contacts_v2_types();
   $type = str_replace('-', '_', $type);
   return isset($types[$type]) ? $types[$type] : FALSE;
+}
+
+
+/**
+ * Load an contact v2 object object from the database.
+ * @param $cid
+ *   The contact v2 ID.
+ * @param $vid
+ *   The revision ID.
+ * @param $reset
+ *   Whether to reset the contact_v2_load_multiple cache.
+ *
+ * @return
+ *   A fully-populated node object.
+ */
+
+function contact_v2_load($cid = NULL, $vid =NULL, $reset = FALSE) {
+  $cids = (isset($cid) ? array($cid): array());
+  $conditions = (isset($vid) ? array('vid' => $vid) : array());
+  $contact_v2 = contact_v2_load_multiple($cids, $conditions, $reset);
+  return $contact_v2 ? reset($contact_v2) : FALSE;
+}
+
+
+/**
+ * Load contact_v2 entities from the database.
+ *
+ * This function should be used whenever you need to load more than one contact_v2
+ * from the database. Artworks are loaded into memory and will not require
+ * database access if loaded again during the same page request.
+ *
+ * @see entity_load()
+ *
+ * @param $cids
+ *   An array of contact v2 IDs.
+ * @param $conditions
+ *   An array of conditions on the {contact_v2} table in the form 'field' => $value.
+ * @param $reset
+ *   Whether to reset the internal entity_load cache.
+ *
+ * @return
+ *   An array of node objects indexed by nid.
+ */
+function contact_v2_load_multiple($cids = array(), $conditions = array(), $reset = FALSE) {
+  return entity_load('contact_v2', $cids, $conditions, $reset);
+}
+
+
+/**
+ * Sets the page title based on the specified contact_v2.
+ *
+ * @param $contact_v2
+ *   The contact v2 object.
+ */
+function contact_v2_page_title($contact_v2) {
+  return $contact_v2->title;
+}
+
+
+
+/**
+ * Save an contact_v2.
+ *
+ * @param $contact_v2
+ *   The contact_v2 to be saved.
+ * @return
+ *   The saved contact_v2, now with an cid if necessary.
+ */
+function contact_v2_save($contact_v2) {
+  return entity_get_controller('contact_v2')->save($contact_v2);
+}
+
+/**
+ * Returns an initialized contact_v2 object.
+ *
+ * @param $type
+ *   The machine-readable type of the contact_v2.
+ *
+ * @return
+ *   An contact_v2 object with all default fields initialized.
+ */
+function contact_v2_new($type = '') {
+  return entity_get_controller('contact_v2')->create($type);
+}
+
+
+/**
+ * Deletes an contact_v2 by ID.
+ *
+ * @param $cid
+ *   The ID of the product to delete.
+ *
+ * @return
+ *   TRUE on success, FALSE otherwise.
+ */
+function contact_v2_delete($cid) {
+  return contact_v2_delete_multiple(array($cid));
+}
+
+/**
+ * Deletes multiple contact_v2s by ID.
+ *
+ * @param $cids
+ *   An array of contact_v2 IDs to delete.
+ *
+ * @return
+ *   TRUE on success, FALSE otherwise.
+ */
+function contact_v2_delete_multiple($cids) {
+  return entity_get_controller('contact_v2')->delete($cids);
+}
+
+
+
+/**
+ * Implements hook_forms().
+ *
+ * All contact_v2 forms share the same form handler.
+ */
+function evolent_v2_forms() {
+  $forms = array();
+  if ($types = contact_v2_types()) {
+    foreach (array_keys($types) as $type) {
+      $forms[$type . '_contact_v2_form']['callback'] = 'contact_v2_form';
+    }
+  }
+  return $forms;
 }
