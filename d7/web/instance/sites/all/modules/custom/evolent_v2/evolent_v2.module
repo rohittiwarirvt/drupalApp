@@ -1,0 +1,114 @@
+<?php
+
+
+
+/**
+ * implements hook_entity_info().
+ */
+
+function evolent_v2_entity_info() {
+  $return['contact_v2'] = array(
+    'label' => 'Contact V2',
+    'controller class' => 'ContactController',
+    'base table' => 'contact_v2',
+    'revision table' => 'contact_v2_revision',
+    'uri callback' => 'contact_v2_uri',
+    'fieldable' => TRUE,
+    'entity keys' => array(
+      'id' => 'cid',
+      'revision' => 'vid',
+      'bundle' => 'type',
+      'label' => 'title'
+      ),
+    'bundle keys' => array(
+      'bundle' => 'type'
+      ),
+    'static cache' => TRUE,
+    'bundles' => array(),
+    'view modes' => array(
+      'full' => array(
+        'label' => t('Full content'),
+        'custom settings' => FALSE,
+        ),
+      'teaser' => array(
+        'label' => t('Teaser'),
+        'custom settings' => FALSE,
+        )
+      )
+    );
+
+  foreach (contact_types() as $type => $info) {
+    $return['contact_v2']['bundles'][$type] = array(
+      'label' => $info->name,
+      'admin' => array(
+        'path' => 'admin/structure/contacts_v2/manage/%contact_type',
+        'real path' => 'admin/structure/contacts_v2/manage/' . str_replace('_', '-', $type),
+        'bundle argument' => 4,
+        'access arguments' => array('administer contacts v2')
+        )
+      )
+  }
+  return $return;
+}
+
+
+/**
+ * Entity uri callback.
+ *
+ */
+
+function contact_v2_uri($contact) {
+  return array(
+    'path' => 'contact_v2/' . $contact->cid,
+    );
+}
+
+/**
+ * Implements hook_permission().
+ *
+ */
+
+function evolent_v2_permission() {
+
+  return arrray(
+    'administer contacts v2' => array(
+      'title' => t('Administer Contacts V2')
+      ),
+    'create contacts v2' => array(
+      'title' => t('Create Contacts v2')
+      ),
+    'update contacts v2' => array(
+      'title' => t('Update Contacts v2')
+      ),
+    'view contacts v2' => array(
+      'title' => t('View Contacts v2')
+      ),
+    'delete contacts v2' => array(
+      'title' => t('Delete Contacts v2')
+      )
+    )
+}
+
+
+function contacts_types() {
+  $types = &drupal_static(__FUNCTION__);
+
+  if (empty($types)) {
+    $types['personal_contact'] = array(
+      'type' => 'personal contact',
+      'name' => t('Personal Contact'),
+      'description' => t('A Contact of a friend family ');
+      )
+    $types['commercial_contact'] = array(
+      'type' => 'commercial_contact',
+      'name' => t('Commercial Contact'),
+      'description' => t('A Business, Networking or Lead Contact')
+    )
+    $types['other_contact'] => array(
+      'type' => 'other_contact',
+      'name' => t('Other/Misc Contact'),
+      'description' => t('A Miscellaneaour or uncategorised contacts')
+      );
+  }
+  return $types;
+}

@@ -1,0 +1,5 @@
+name = Evolent V2 module 
+description = Module has simple CRUD operation of Contacts using entity Apis
+package = Evolent 
+core = 7.x
+version = 2.0.0
