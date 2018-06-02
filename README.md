@@ -9,12 +9,12 @@ I had planned to make this project a multiple ways to achieve the same functiona
   1. **Version 1** (Done)
       * Create Contacts as simple CRUD operation using Table for Contacts and Form API for Create Update Delete operation
       * Have used Menu hooks, Db queries, hook_install and made it in drupal version 7
-  2. **Version 2** (In Progress)
+  2. **Version 2** (Done)
       * Create Contacts as an entity and have corresponding bundles (Leads, Official, etc)
       *  Use entity_info, Default Entity Controller and use fields api to let user add new fields or code one for then as started
      * Can use extra fields for some of the base table entries so that they could act as or interface with field api
       * to be made in Drupal 7
-  3. **Version 3** (To be done)
+  3. **Version 3** (In Progress)
       * Similar to Version 1 , but to be done in drupal 8 (using controllers, menu.links, routes, permission.yrm, schema etc)
   4. **Version 4** ( To be done)
      * Similar to Version 2, but to be again done in drupal 8 (useing, entity api, and related context)
