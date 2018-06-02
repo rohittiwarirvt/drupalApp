@@ -1,0 +1,191 @@
+<?php
+
+
+
+/**
+ * implements hook_entity_info().
+ */
+
+function evolent_v2_entity_info() {
+  $return['contact_v2'] = array(
+    'label' => 'Contact V2',
+    'controller class' => 'ContactController',
+    'base table' => 'contact_v2',
+    'revision table' => 'contact_v2_revision',
+    'uri callback' => 'contact_v2_uri',
+    'fieldable' => TRUE,
+    'entity keys' => array(
+      'id' => 'cid',
+      'revision' => 'vid',
+      'bundle' => 'type',
+      'label' => 'title'
+      ),
+    'bundle keys' => array(
+      'bundle' => 'type'
+      ),
+    'static cache' => TRUE,
+    'bundles' => array(),
+    'view modes' => array(
+      'full' => array(
+        'label' => t('Full content'),
+        'custom settings' => FALSE,
+        ),
+      'teaser' => array(
+        'label' => t('Teaser'),
+        'custom settings' => FALSE,
+        )
+      )
+    );
+
+  foreach (contacts_v2_types() as $type => $info) {
+    $return['contact_v2']['bundles'][$type] = array(
+      'label' => $info->name,
+      'admin' => array(
+        'path' => 'admin/structure/contacts_v2/manage/%contact_type',
+        'real path' => 'admin/structure/contacts_v2/manage/' . str_replace('_', '-', $type),
+        'bundle argument' => 4,
+        'access arguments' => array('administer contacts v2')
+        )
+      )
+  }
+  return $return;
+}
+
+
+/**
+ * Entity uri callback.
+ *
+ */
+
+function contact_v2_uri($contact) {
+  return array(
+    'path' => 'contact_v2/' . $contact->cid,
+    );
+}
+
+/**
+ * Implements hook_permission().
+ *
+ */
+
+function evolent_v2_permission() {
+
+  return arrray(
+    'administer contacts v2' => array(
+      'title' => t('Administer Contacts V2')
+      ),
+    'create contacts v2' => array(
+      'title' => t('Create Contacts v2')
+      ),
+    'update contacts v2' => array(
+      'title' => t('Update Contacts v2')
+      ),
+    'view contacts v2' => array(
+      'title' => t('View Contacts v2')
+      ),
+    'delete contacts v2' => array(
+      'title' => t('Delete Contacts v2')
+      )
+    )
+}
+
+
+function contacts_v2_types() {
+  $types = &drupal_static(__FUNCTION__);
+
+  if (empty($types)) {
+    $types['personal_contact'] = array(
+      'type' => 'personal contact',
+      'name' => t('Personal Contact'),
+      'description' => t('A Contact of a friend family ');
+      )
+    $types['commercial_contact'] = array(
+      'type' => 'commercial_contact',
+      'name' => t('Commercial Contact'),
+      'description' => t('A Business, Networking or Lead Contact')
+    )
+    $types['other_contact'] => array(
+      'type' => 'other_contact',
+      'name' => t('Other/Misc Contact'),
+      'description' => t('A Miscellaneaour or uncategorised contacts')
+      );
+  }
+  return $types;
+}
+
+
+/**
+ * Implements hook_menu().
+ *
+ */
+
+function evolent_v2_menu() {
+  $menu = array();
+
+  $menu['admin/structure/contacts_v2'] = array(
+    'title' => 'Manage contacts v2',
+    'description' => 'Manage Contacts V2',
+    'page callback' => 'contacts_v2_overview_types',
+    'access arguments' => array('administer contacts v2'),
+    'file' => 'evolent_v2.admin.inc'
+    );
+
+  $menu['admin/structure/contacts_v2/manage/%contacts_v2_type'] = array(
+    'title' => 'View contact type',
+    'title callback' => 'contacts_v2_type_page_title',
+    'title arguments' => array(4),
+    'page callback' => 'contact_v2_information',
+    'page arguments' => array(4),
+    'access arguments' => array('administer contacts v2'),
+    'file' => 'evolent_v2.admin.inc'
+  );
+
+  $menu['admin/structure/contacts_v2/manage/%contacts_v2_type/view'] = array(
+    'title' => 'View',
+    'type' => MENU_DEFAULT_LOCAL_TASK
+  );
+
+
+  $menu['contact_v2/add'] = array(
+    'title' => 'Add new Contact v2',
+    'description' => 'Add new Contact v2',
+    'page callback' => 'contacts_v2_add_page',
+    'access arguments' => array('create contacts v2'),
+    'menu_name' => 'management',
+    'file' => 'evolent_v2.pages.inc'
+  )
+
+}
+
+
+/**
+ *  Menu title callback.
+ *
+ *  @param $type
+ *    The contact type.
+ *  @return  string
+ *    The human friendly name of contact
+ */
+
+
+function contacts_v3_type_page_title($type) {
+  return t('Manage @type', array('@type' => $type->name));
+}
+
+
+/**
+ * Get an individual contact v2 type definition object
+ *
+ * @param $type
+ *   The key of the contact v2 type we want to get
+ *
+ * @return object
+ *   The specified contact type
+ */
+
+
+function contact_v2_type_load($type) {
+  $types = contacts_v2_types();
+  $type = str_replace('-', '_', $type);
+  return isset($types[$type]) ? $types[$type] : FALSE;
+}
