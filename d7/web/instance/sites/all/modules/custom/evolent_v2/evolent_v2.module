@@ -153,7 +153,20 @@ function evolent_v2_menu() {
     'access arguments' => array('create contacts v2'),
     'menu_name' => 'management',
     'file' => 'evolent_v2.pages.inc'
-  )
+  );
+
+  foreach (contacts_v2_types() as  $type) {
+    $type_url_str = str_replace('_', '-', $type->type)
+    $menu['contact_v3/add/' . $type_url_str] = array(
+      'title' => $type->$title,
+      'title callback' => 'check_plain',
+      'page callback' => 'contacts_v2_add',
+      'page arguments' => array(2),
+      'access arguments' => array('create contacts v2'),
+      'description' => $type->description,
+      'file' => 'evolent_v2.pages.inc'
+    )
+  }
 
 }
 
