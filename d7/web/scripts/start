@@ -1,10 +1,4 @@
 #!/bin/bash
-<<<<<<< HEAD
-echo "hi m executing"
-=======
 source ~/.bashrc
 drush -r /var/www/html/ -vvv site-install evolent  --site-name=Assignment --account-name=admin --account-pass=admin -y
 docker-php-entrypoint apache2-foreground
-
-
->>>>>>> 58b5421dc05b92d860728c958ec3a128b2674796

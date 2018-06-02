@@ -18,11 +18,8 @@ dependencies[] = taxonomy
 dependencies[] = dblog
 dependencies[] = search
 dependencies[] = shortcut
-<<<<<<< HEAD
 dependencies[] = toolbar
 dependencies[] = overlay
-=======
->>>>>>> 58b5421dc05b92d860728c958ec3a128b2674796
 dependencies[] = field_ui
 dependencies[] = file
 dependencies[] = rdf
