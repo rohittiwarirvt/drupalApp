@@ -44,5 +44,15 @@ function ur_d7_aws_secret_manager_form($form, &$form_state) {
     '#description' => t('A string to prefix the key name with. Secret name can contain alphanumeric characters and the characters /_+=,.@-.'),
   );
 
+  $form['ur_d7_aws_secret_manager_secret_enable'] = array(
+    '#type' => 'checkbox',
+    '#default_value' => variable_get('ur_d7_aws_secret_manager_secret_enable', 0),
+    '#title'=> t('Enable Database Switch')
+    );
+  $form['#submit'][] = 'ur_d7_aws_secret_manager_form_submit';
   return system_settings_form($form);
+}
+
+function ur_d7_aws_secret_manager_form_submit($form, $form_state) {
+  dsm($form, "test");
 }
