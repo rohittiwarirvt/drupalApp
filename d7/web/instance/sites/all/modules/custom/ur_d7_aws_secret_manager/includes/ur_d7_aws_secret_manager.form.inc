@@ -54,5 +54,6 @@ function ur_d7_aws_secret_manager_form($form, &$form_state) {
 }
 
 function ur_d7_aws_secret_manager_form_submit($form, $form_state) {
-  dsm($form, "test");
+  module_load_include('inc', 'ur_d7_aws_secret_manager', 'includes/ur_d7_aws_secret_manager_utils');
+  get_aws_secret_manager_connection($form_state);
 }

@@ -638,3 +638,9 @@ if ($current_env) {
     require_once $env_settings_file;
   }
 }
+
+$aws_env_settings_file = __DIR__ . DIRECTORY_SEPARATOR . 'site-php/settings-aws.php';
+if (file_exists($aws_env_settings_file)) {
+  require_once $env_settings_file;
+}
+
